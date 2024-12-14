@@ -2,11 +2,7 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 import os
 import requests
-from bs4 import BeautifulSoup
-from urllib.request import urlopen
 import tldextract
-import json
-from notion_database.properties import Properties
 
 load_dotenv()
 

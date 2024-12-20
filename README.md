@@ -47,24 +47,28 @@ This project automates the process of tracking job applications using the Notion
 
 7. Add add-job script to path
 
-  Option 1. Add current path to $PATH environment
-  ```nano ~/.bashrc
+     Option 1. Add current path to $PATH environment
+     ```sh
+     nano ~/.bashrc
      export PATH="$PATH:/home/pri/Desktop/repos/Job-App-Tracker-Automation"
-  ```
-    Save the file and reload the shell configuration
-    ```source ~/.bashrc```
+     ```
+     Save the file and reload the shell configuration
+       ```sh
+         source ~/.bashrc```
 
-  Option2. Move add-job script to an existing $PATH environment
-    ```sudo mv /current/path/add-job /new/path```
+     Option 2. Move add-job script to an existing $PATH environment
+       ```sh
+         sudo mv /current/path/add-job /new/path```
     Ensure the script is executable
-    ``` sudo chmod +x /new/path/add-job```
+       ```sh
+          sudo chmod +x /new/path/add-job```
     
 ## Usage
 
-1. Run the python script:
+1. Run the python script from its directory:
 
   ```sh
-python3 main.py
+   python3 main.py
   ```
 
 2. Enter parameters when prompted
@@ -73,12 +77,12 @@ OR
 
 Run script from anywhere:
 
-1. Use [add-jobs] command followed by parameters
+1. Use [add-job] command followed by parameters
 
 #### Syntax
 
 ```sh
-./add-job -a [url] [-s status] [-r role] [-l location] [-p priority] [-t type] [-j job-site] [-n notes]
+add-job -a [url] [-s status] [-r role] [-l location] [-p priority] [-t type] [-j job-site] [-n notes]
 
 Options
 -h Help.

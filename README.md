@@ -36,17 +36,32 @@ This project automates the process of tracking job applications using the Notion
    pip install -r requirements.txt
    ```
 
-6. Create a .env file in the project directory and add your Notion API key and database ID:
+5. Create a .env file in the project directory and add your Notion API key, OpenAI API Key and database ID:
 
     ```sh
-   API_KEY="your_notion_api_key"
-   API_BASE_URL="https://api.notion.com/v1/"
-   Page_Id="your_notion_database_id"
+   Notion_API_KEY="your_notion_api_key"
+   OPENAI_API_KEY="your_openai_api_key"
+   database_id="your_notion_database_id"
    ```
+6. Update your main.py path in add-job script
+
+7. Add add-job script to path
+
+  Option 1. Add current path to $PATH environment
+  ```nano ~/.bashrc
+     export PATH="$PATH:/home/pri/Desktop/repos/Job-App-Tracker-Automation"
+  ```
+    Save the file and reload the shell configuration
+    ```source ~/.bashrc```
+
+  Option2. Move add-job script to an existing $PATH environment
+    ```sudo mv /current/path/add-job /new/path```
+    Ensure the script is executable
+    ``` sudo chmod +x /new/path/add-job```
     
 ## Usage
 
-1. Run the script:
+1. Run the python script:
 
   ```sh
 python3 main.py
@@ -54,3 +69,25 @@ python3 main.py
 
 2. Enter parameters when prompted
 
+OR
+
+Run script from anywhere:
+
+1. Use [add-jobs] command followed by parameters
+
+#### Syntax
+
+```sh
+./add-job -a [url] [-s status] [-r role] [-l location] [-p priority] [-t type] [-j job-site] [-n notes]
+
+Options
+-h Help.
+-a Add a new job application --URL is required.
+-s Add the status of the job application. Options are: 'Not started', 'Applied', 'In progress', 'Responded', 'Rejected', 'Dropped', 'Interviewing Stage'.
+-r Add the role of the job application.
+-l Add the location of the job application.
+-p Add the priority of the job application. Options are: 'High', 'Normal', 'Low'.
+-j Add the job site where the job application was found. Options are: 'Indeed', 'NewGrad-jobs', 'Otta', 'Handshake', 'Google Jobs'.
+-t Add the type of the job application. Options are: 'Internship', 'Contract', 'Part-time', 'Full-time'.
+-n Add notes to the job application.
+```

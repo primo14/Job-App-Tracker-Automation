@@ -86,7 +86,7 @@ add-job -a [url] [-s status] [-r role] [-l location] [-p priority] [-t type] [-j
 
 Options
 -h Help.
--a Add a new job application --URL is required.
+-a Add a new job application. Required parameter.
 -s Add the status of the job application. Options are: 'Not started', 'Applied', 'In progress', 'Responded', 'Rejected', 'Dropped', 'Interviewing Stage'.
 -r Add the role of the job application.
 -l Add the location of the job application.

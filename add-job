@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+Help()
+{
+   # Display Help
+   echo "Automate the job application tracking process."
+   echo
+   echo "Syntax: main.sh [-h] [-a url] [-s status] [-r role] [-l location] [-p priority] [-t type] [-j job-site] [-n notes]"
+   echo "options:"
+   echo "h     Help."
+   echo "a     Add a new job application --URL is required."
+   echo "s     Add the status of the job application. Options are: 'Not started', 'Applied', 'In progress', 'Responded', 'Rejected', 'Dropped','Interviewing Stage'."
+   echo "r     Add the role of the job application."
+   echo "l     Add the location of the job application."
+   echo "p     Add the priority of the job application.Options are: 'High', 'Normal', 'Low'."
+   echo "j     Add the job site where the job application was found. Options are: 'Indeed', 'NewGrad-jobs', 'Otta', 'Handshake', 'Google Jobs'."
+   echo "t     Add the type of the job application. Options are: 'Internship', 'Contract', 'Part-time','Full-time'."
+   echo "n     Add notes to the job application."
+   echo
+}
+
+# Initialize variables
+url=""
+status=""
+role=""
+location=""
+priority=""
+type=""
+job_site=""
+notes=""
+
+# Parse command-line arguments
+while getopts "ha:s:r:l:p:t:n:" option; do
+   case $option in
+      h) # Display Help
+         Help
+         exit;;
+      a) # Add a new job application
+         url=$OPTARG;;
+      s) # Add the status of the job application
+         status=$OPTARG;;
+      r) # Add the role of the job application
+         role=$OPTARG;;
+      l) # Add the location of the job application
+         location=$OPTARG;;
+      p) # Add the priority of the job application
+         priority=$OPTARG;;
+      t) # Add the type of the job application
+         type=$OPTARG;;
+      j) # Add the job site where the job application was found
+         job_site=$OPTARG;;
+      n) # Add notes to the job application
+         notes=$OPTARG;;
+      \?) # Invalid option
+         echo "Error: Invalid option"
+         exit;;
+   esac
+done
+
+if [[ -n "$url" && "$url" == https://* ]]; then
+    # Activate the virtual environment
+    source /home/pri/Desktop/repos/Job-App-Tracker-Automation/venv/bin/activate
+    # Run the Python script with the provided arguments
+    python3 /home/pri/Desktop/repos/Job-App-Tracker-Automation/main.py "$url" "status:$status" "role:$role" "location:$location" "priority:$priority" "type:$type" "job-site:$job_site" "notes:$notes"
+    exit 2
+else
+    Help
+    exit 1
+fi
+
+
+bash

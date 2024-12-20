@@ -1,15 +1,29 @@
+from ast import arg
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 import os
 import requests
 import tldextract
+import json
+from bs4 import BeautifulSoup
+from pydantic import BaseModel
+from openai import OpenAI
+import argparse
+import sys
 
 load_dotenv()
 
-API_KEY = os.getenv("API_KEY")
-API_URL = os.getenv("API_URL")
-Page_Id = os.getenv("Page_Id")  
+Notion_API_KEY = os.getenv("Notion_API_KEY")
+OpenAI_API_KEY = os.getenv("OpenAI_API_KEY")
+Database_id = os.getenv("Database_Id")  
 
+client = OpenAI()
+
+class JobRow(BaseModel):
+    role: str
+    company_name: str
+    type: str
+    location: str
 
 row = {
   "role": "Software Engineer",
@@ -19,58 +33,90 @@ row = {
   "type": "Full-time",
   "application-link": "https://www.google.com",
   "location": "Mountain View, CA",
-  "job-site": "Otta",
+  "job-site": "NewGrad-Jobs",
   "notes": "",
-    "status": "Applied"
+  "status": "Applied"
  }
 
-headers = {
-    "Authorization": "Bearer " + API_KEY,
+notion_headers = {
+    "Authorization": "Bearer " + Notion_API_KEY,
     "Content-Type": "application/json",
     "Notion-Version": "2022-06-28",
 }
+def get_all_text_from_url(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        print("Access Denied. Check if the website allows scraping.")
+        return "Forbidden"
+    soup = BeautifulSoup(response.text, "html.parser")
+    text = soup.get_text(separator=" ", strip=True)
+    return text
 
-def create_row():
-    user_input = input()
-    if(user_input == ""):
-        print("URL Required. Run script again.")
-        return False;
-    input_parts = user_input.split(" & ")
-    url = input_parts[0]
+def create_row(url,properties):
+    if url == "":
+        return False
     row["application-link"] = url
-    for part in input_parts[1:]:
+    text = get_all_text_from_url(url)
+    if text== "Access Denied":
+        return False
+    completion = client.beta.chat.completions.parse(
+        model="gpt-4o-mini",
+        temperature=0.5,
+        top_p=0.7,
+        messages=[
+            {"role": "system", "content": "Extract company name, job/role name, type of role(Full-time,Part-time,Internship or Contract) and job location."
+             +"For the job location, check to see if remote or hybrid is an option and add that to the location." 
+             + "If the description does not include the word remote or hybrid then do not add it to the location."
+             +"Get extract this information from the given text taken from the job description."},
+            {"role": "user", "content": text},
+        ],
+        response_format=JobRow,
+    )
+    if len(completion.choices) == 0:
+        print("No response from AI. Run script again.")
+        return False
+    ai_query_response = completion.choices[0].message.parsed
+    #print(ai_query_response)
+    row["role"] = ai_query_response.role
+    row["type"] = ai_query_response.type
+    row["location"] = ai_query_response.location
+    row["company_name"] = ai_query_response.company_name
+    for part in properties:
         key_value = part.split(":")
         if len(key_value) == 2:
             key, value = key_value
             if key in row:
-                row[key] = value
-
-    extracted = tldextract.extract(url)
+                row[key] = value if value != "" else row[key]   
+    """extracted = tldextract.extract(url)
     row["company_name"] = extracted.domain
     if row["company_name"].__contains__("icims") or row["company_name"].__contains__("workday") or row["company_name"].__contains__("greenhouse"):
-       row["company_name"] = extracted.subdomain
+       row["company_name"] = extracted.subdomain"""
+    return True
     #print(row.company_name)  # Output: example 
 
 
 def get_pages(num_pages=None):
-    url = f"https://api.notion.com/v1/databases/{Page_Id}/query"
+    url = f"https://api.notion.com/v1/databases/{Database_id}/query"
     get_all = num_pages is None
     page_size = 100 if get_all else num_pages
     payload = {"page_size": page_size}
-    response = requests.post(url, json=payload, headers=headers)
+    response = requests.post(url, json=payload, headers=notion_headers)
     data = response.json()
     results = data["results"]
     while data["has_more"] and get_all:
         payload = {"page_size": page_size, "start_cursor": data["next_cursor"]}
-        url = f"https://api.notion.com/v1/databases/{Page_Id}/query"
-        response = requests.post(url, json=payload, headers=headers)
+        url = f"https://api.notion.com/v1/databases/{Database_id}/query"
+        response = requests.post(url, json=payload, headers=notion_headers)
         data = response.json()
         results.extend(data["results"])
     return results
 
-def update_database():
-    if create_row() is False:
-        return
+def update_database(url,properties):
+    if create_row(url, properties) is False:
+        return 
     data = {
         "Role Name": {"title": [{"text": {"content": row["role"]}}]},
         "Company": {"type": "rich_text", "rich_text":[{"text": {"content": row["company_name"]}}]},
@@ -83,19 +129,27 @@ def update_database():
         "Job site": {"type": "select", "select": {"name": row["job-site"]}},
         "Notes": {"type": "rich_text", "rich_text": [{"text": {"content": row["notes"]}}]},
     }
-
+    if data["Status"]["status"]["name"] == "Not started" or data["Status"]["status"]["name"] == "In progress":
+        data.pop("Sent Date",None)
+        row.pop("date",None)
+    print(json.dumps(row, indent=2))
     url = "https://api.notion.com/v1/pages"
-    payload = {"parent": {"database_id": Page_Id},
+    payload = {"parent": {"database_id": Database_id},
     "properties": data}
-    res = requests.post(url,json=payload,headers=headers)
+    res = requests.post(url,json=payload,headers=notion_headers)
     if res.status_code == 200:
         print('Page added successfully!')
     else:
         print('Error creating page:', res.text)
 
-print("\nEnter the job details in the following format: <application-link> & <'PropName':'PropValue'> & <'PropName':'PropValue'> ...\n")
-update_database()
+#print("\nEnter the job details in the following format: <application-link> & <'PropName':'PropValue'> & <'PropName':'PropValue'> ...\n")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Job Application Tracker")
+    parser.add_argument("url", help="The application link",type=str)
+    parser.add_argument("properties", nargs="*", help="Additional properties in the format 'PropName:PropValue'")
+    args = parser.parse_args()
 
+    update_database(args.url, args.properties)
 
 """""
 pages = get_pages()
@@ -105,3 +159,12 @@ for page in pages:
     print(json.dumps(props, indent=2))
     exit()
     """
+
+""""completion = client.beta.chat.completions.parse(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "Get company name, job/role name, type of role(Full-time,Part-time,Internship or Contract) and job location.If the description does not include the word remote. This is not a remote location.Look for job location. Get this from the job application link."},
+            {"role": "user", "content": url},
+        ],
+        response_format=JobRow,
+    )"""

@@ -77,7 +77,7 @@ OR
 
 Run script from anywhere:
 
-1. Use [add-job] command followed by parameters
+1. Use ```add-job``` command followed by parameters
 
 #### Syntax
 

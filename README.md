@@ -5,8 +5,17 @@ This project automates the process of tracking job applications using the Notion
 ## Features
 
 - Input job application details via the command line.
-- Automatically extract company name from the application URL.
+- Uses AI to obtain info needed to fill tracker from the application URL.
 - Update a Notion database with job application details.
+  
+#### Notion Database:
+
+![screenshot-2025-01-08-22-12-45](https://github.com/user-attachments/assets/16c6f080-808b-4c9b-bbaa-b707873866a7)
+
+Add and set up notion database with my template: 
+https://www.notion.so/primo99/Job-Automation-Tracker-Template-175fd2b697e080e491d1cc76e9c8f74c?pvs=4
+
+Make sure you reflect any changes to your database in the code!
 
 ## Prerequisites
 

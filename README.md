@@ -13,6 +13,7 @@ This project automates the process of tracking job applications using the Notion
 - Python 3.9 or higher
 - Notion API key
 - Notion database ID
+- OpenAI API key
 
 ## Installation
 

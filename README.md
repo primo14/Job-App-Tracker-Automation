@@ -92,7 +92,7 @@ Run script from anywhere:
 #### Syntax
 
 ```sh
-add-job -a [url] [-s status] [-r role] [-l location] [-p priority] [-t type] [-j job-site] [-n notes]
+example: add-job -a [url] [-s status] [-r role] [-l location] [-p priority] [-t type] [-j job-site] [-n notes]
 
 Options
 -h Help.

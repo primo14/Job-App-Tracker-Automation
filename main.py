@@ -5,6 +5,10 @@ import os
 import requests
 import tldextract
 import json
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 from openai import OpenAI
@@ -47,12 +51,28 @@ def get_all_text_from_url(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     }
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        print("Access Denied. Check if the website allows scraping.")
-        return "Forbidden"
-    soup = BeautifulSoup(response.text, "html.parser")
+
+    options = Options()
+    options.headless = True
+    options.binary_location = "/home/pri/.local/share/flatpak/app/com.brave.Browser/current/active/export/bin/com.brave.Browser"
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--remote-debugging-port=9222")
+    
+    #print(f"Using Brave binary at: {options.binary_location}")
+    #print(f"Opening URL: {url}")
+
+    driver = webdriver.Chrome(service=ChromeService("/usr/local/bin/chromedriver"), options=options)  # Specify the path to the ChromeDriver binary
+    driver.get(url)
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    
+    try:
+        driver.close()
+    except Exception as e:
+        print(e)
     text = soup.get_text(separator=" ", strip=True)
+    #print(text)
     return text
 
 def create_row(url,properties):

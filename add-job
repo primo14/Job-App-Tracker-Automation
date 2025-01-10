@@ -5,7 +5,7 @@ Help()
    # Display Help
    echo "Automate the job application tracking process."
    echo
-   echo "Syntax: main.sh [-h] [-a url] [-s status] [-r role] [-l location] [-p priority] [-t type] [-j job-site] [-n notes]"
+   echo "Syntax example: add-job -a [url] [-s status] [-r role] [-l location] [-p priority] [-t type] [-j job-site] [-n notes]"
    echo "options:"
    echo "h     Help."
    echo "a     Add a new job application --URL is required."
@@ -15,7 +15,8 @@ Help()
    echo "p     Add the priority of the job application.Options are: 'High', 'Normal', 'Low'."
    echo "j     Add the job site where the job application was found. Options are: 'Indeed', 'NewGrad-jobs', 'Otta', 'Handshake', 'Google Jobs'."
    echo "t     Add the type of the job application. Options are: 'Internship', 'Contract', 'Part-time','Full-time'."
-   echo "n     Add notes to the job application."
+   echo "n     Add notes to the job application."]
+   echo "E     Exit."
    echo
 }
 
@@ -30,11 +31,10 @@ job_site=""
 notes=""
 
 # Parse command-line arguments
-while getopts "ha:s:r:l:p:t:n:" option; do
+while getopts "ha:s:r:l:p:j:t:n:" option; do
    case $option in
       h) # Display Help
-         Help
-         exit;;
+         Help;;
       a) # Add a new job application
          url=$OPTARG;;
       s) # Add the status of the job application
@@ -53,7 +53,7 @@ while getopts "ha:s:r:l:p:t:n:" option; do
          notes=$OPTARG;;
       \?) # Invalid option
          echo "Error: Invalid option"
-         exit;;
+         
    esac
 done
 
@@ -64,9 +64,8 @@ if [[ -n "$url" && "$url" == https://* ]]; then
     python3 /home/pri/Desktop/repos/Job-App-Tracker-Automation/main.py "$url" "status:$status" "role:$role" "location:$location" "priority:$priority" "type:$type" "job-site:$job_site" "notes:$notes"
     exit 2
 else
-    Help
-    exit 1
+   Help
 fi
 
 
-bash
+exec bash

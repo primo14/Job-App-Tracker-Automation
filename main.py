@@ -29,6 +29,7 @@ class JobRow(BaseModel):
     type: str
     location: str
 
+# Preset row values -- change as needed
 row = {
   "role": "Software Engineer",
   "company_name": "Google",
@@ -47,6 +48,7 @@ notion_headers = {
     "Content-Type": "application/json",
     "Notion-Version": "2022-06-28",
 }
+
 def get_all_text_from_url(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"

@@ -17,15 +17,13 @@ import sys
 
 load_dotenv()
 
-Notion_API_KEY = os.getenv("Notion_API_KEY")
-OpenAI_API_KEY = os.getenv("OpenAI_API_KEY")
-Database_id = os.getenv("Database_Id")  
-ChromeDriver_Path = os.getenv("ChromeDriver_Path")
-Browser_Path = os.getenv("Browser_Path")
+Notion_API_KEY = os.getenv("Notion_API_KEY")  
+OpenAI_API_KEY = os.getenv("OPENAI_API_KEY")  
+Database_id = os.getenv("Database_Id")       
+ChromeDriver_Path = os.getenv("ChromeDriver_Path")  
+Browser_Path = os.getenv("Browser_Executable_Path")
 
-if Notion_API_KEY is None or OpenAI_API_KEY is None or Database_id is None or ChromeDriver_Path is None or Browser_Path is None:
-    print("Missing environment variable. Please set the environment variables: Notion_API_KEY, OpenAI_API_KEY, Database_Id, ChromeDriver_Path, Browser_Path")
-    sys.exit(1)
+
 
 client = OpenAI()
 

@@ -20,6 +20,12 @@ load_dotenv()
 Notion_API_KEY = os.getenv("Notion_API_KEY")
 OpenAI_API_KEY = os.getenv("OpenAI_API_KEY")
 Database_id = os.getenv("Database_Id")  
+ChromeDriver_Path = os.getenv("ChromeDriver_Path")
+Browser_Path = os.getenv("Browser_Path")
+
+if Notion_API_KEY is None or OpenAI_API_KEY is None or Database_id is None or ChromeDriver_Path is None or Browser_Path is None:
+    print("Missing environment variable. Please set the environment variables: Notion_API_KEY, OpenAI_API_KEY, Database_Id, ChromeDriver_Path, Browser_Path")
+    sys.exit(1)
 
 client = OpenAI()
 
@@ -56,7 +62,7 @@ def get_all_text_from_url(url):
 
     options = Options()
     options.headless = True
-    options.binary_location = "/home/pri/.local/share/flatpak/app/com.brave.Browser/current/active/export/bin/com.brave.Browser"
+    options.binary_location = Browser_Path
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
@@ -65,7 +71,7 @@ def get_all_text_from_url(url):
     #print(f"Using Brave binary at: {options.binary_location}")
     #print(f"Opening URL: {url}")
 
-    driver = webdriver.Chrome(service=ChromeService("/usr/local/bin/chromedriver"), options=options)  # Specify the path to the ChromeDriver binary
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriver_Path), options=options)  # Specify the path to the ChromeDriver binary
     driver.get(url)
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     

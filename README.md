@@ -7,6 +7,8 @@ This project automates the process of tracking job applications using the Notion
 - Input job application details via the command line.
 - Uses AI to obtain info needed to fill tracker from the application URL.
 - Update a Notion database with job application details.
+- Skips duplicate entries when the same application URL is submitted twice.
+- `--list` prints a status breakdown and flags stale "Applied" applications with no response.
   
 #### Notion Database:
 
@@ -20,6 +22,7 @@ Make sure you reflect any changes to your database in the code!
 ## Prerequisites
 
 - Python 3.9 or higher
+- Google Chrome, Chromium, or Brave installed (ChromeDriver itself is downloaded and managed automatically)
 - Notion API key
 - Notion database ID
 - OpenAI API key
@@ -29,65 +32,77 @@ Make sure you reflect any changes to your database in the code!
 1. Clone the repository:
    
     ```sh
-    git clone https://github.com/yourusername/job-app-tracker-automation.git
-    cd job-app-tracker-automation
+    git clone https://github.com/primo14/Job-App-Tracker-Automation.git
+    cd Job-App-Tracker-Automation
     ```
     
-3. Create and activate a virtual environment:
+2. Create and activate a virtual environment:
    
    ```sh
    python3 -m venv venv
    source venv/bin/activate
    ```
    
-4. Install the required packages:
+3. Install the required packages:
 
     ```sh
    pip install -r requirements.txt
    ```
 
-5. Create a .env file in the project directory and add your Notion API key, OpenAI API Key and database ID:
+4. Create a .env file in the project directory (copy `.env.example` as a starting point) and fill in your keys:
+
+    ```sh
+   cp .env.example .env
+   ```
 
     ```sh
    Notion_API_KEY="your_notion_api_key"
    OPENAI_API_KEY="your_openai_api_key"
-   database_id="your_notion_database_id"
+   Database_Id="your_notion_database_id"
    ```
-6. Update your main.py path in add-job script
 
-7. Add add-job script to path
+   `Browser_Executable_Path` is optional — only set it if you want Selenium to use a
+   non-default browser (e.g. Brave instead of a standard Chrome install):
 
-     Option 1. Add current path to $PATH environment
-     ```sh
-     nano ~/.bashrc
-     export PATH="$PATH:/home/pri/Desktop/repos/Job-App-Tracker-Automation"
-     ```
-     Save the file and reload the shell configuration
-       ```sh
-         source ~/.bashrc```
+    ```sh
+   Browser_Executable_Path="/path/to/chrome-or-chromium-binary"
+   ```
 
-     Option 2. Move add-job script to an existing $PATH environment
-       ```sh
-         sudo mv /current/path/add-job /new/path```
-    Ensure the script is executable
-       ```sh
-          sudo chmod +x /new/path/add-job```
-    
+5. (Optional) The `add-job` script lets you run the tracker as a plain shell command
+   from anywhere, instead of `cd`-ing into this repo and running `python3 main.py`
+   each time. It hardcodes two absolute paths that need to point at wherever you
+   cloned this repo — open `add-job` and update both:
+
+    ```sh
+    source /path/to/Job-App-Tracker-Automation/venv/bin/activate
+    python3 /path/to/Job-App-Tracker-Automation/main.py ...
+    ```
+
+6. Add the `add-job` script to your `$PATH`:
+
+   **Option 1: add this repo's directory to `$PATH`**
+   ```sh
+   echo 'export PATH="$PATH:/path/to/Job-App-Tracker-Automation"' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+
+   **Option 2: move `add-job` into a directory already on your `$PATH`**
+   ```sh
+   sudo mv /path/to/Job-App-Tracker-Automation/add-job /usr/local/bin/add-job
+   sudo chmod +x /usr/local/bin/add-job
+   ```
+
 ## Usage
 
-1. Run the python script from its directory:
+Run directly with Python:
 
-  ```sh
-   python3 main.py
-  ```
+```sh
+python3 main.py <application-url> ["PropName:PropValue" ...]
+```
 
-2. Enter parameters when prompted
+OR, if you've added `add-job` to your `$PATH`:
 
-OR
-
-Run script from anywhere:
-
-1. Use ```add-job``` command followed by parameters
+Use ```add-job``` command followed by parameters
 
 #### Syntax
 
@@ -104,4 +119,16 @@ Options
 -j Add the job site where the job application was found. Options are: 'Indeed', 'NewGrad-jobs', 'Otta', 'Handshake', 'Google Jobs'.
 -t Add the type of the job application. Options are: 'Internship', 'Contract', 'Part-time', 'Full-time'.
 -n Add notes to the job application.
+```
+
+If a URL you already added is submitted again, it's skipped instead of creating a duplicate entry.
+
+#### Summary view
+
+Print a status breakdown of everything in the tracker, and flag "Applied" applications
+that haven't had a status update in a while (14 days by default):
+
+```sh
+python3 main.py --list
+python3 main.py --list --stale-after 7
 ```
